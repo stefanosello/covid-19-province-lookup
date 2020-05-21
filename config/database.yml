@@ -1,0 +1,17 @@
+development:
+  adapter: postgresql
+  database: covid_19_province_lookup_development
+  username: stefano
+  password: stefano
+  encoding: unicode
+  host: localhost
+  pool: 5
+
+test:
+  adapter: postgresql
+  database: covid_19_province_lookup_development
+  username: stefano
+  password: stefano
+  encoding: unicode
+  host: localhost
+  pool: 5
