@@ -6,7 +6,7 @@ namespace :data_management do
   REPOSITORY_BASE_URL = "https://raw.githubusercontent.com/pcm-dpc/COVID-19/master/dati-province/dpc-covid19-ita-province-"
 
   desc "Import data from github directory"
-  task :import_today_data, [:init_date_string] => :environment do |t, args|
+  task :import_data, [:init_date_string] => :environment do |t, args|
     include DataManagement
 
     init_date_string = INIT_DATE_STRING
@@ -17,11 +17,17 @@ namespace :data_management do
     import_all_data(init_date_string, REPOSITORY_BASE_URL)
   end
 
+  desc "Import today data from github directory"
+  task :import_today_data => :environment do |t|
+    include DataManagement
+    init_date_string = "#{DateTime.now.day}/#{DateTime.now.month}/#{DateTime.now.year}"
+    import_all_data(init_date_string, REPOSITORY_BASE_URL)
+  end
+
   module DataManagement
 
     def import_all_data(init_date_string, file_base_url)
       exit_loop = false
-      today = DateTime.now
       date = DateTime.parse(init_date_string)
 
       data = Array.new
