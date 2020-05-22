@@ -21,7 +21,7 @@ test:
 
 production:
   <<: *default
-  database: dehjrmqjo4i929
-  username: msblqrgzomagub
-  password: <%= ENV['DATABASE_PASSWORD'] %>
-  host: ec2-54-228-251-117.eu-west-1.compute.amazonaws.com
+  database: <%= ENV['COVID_19_PROVINCE_LOOKUP_DATABASE_NAME'] %>
+  username: <%= ENV['COVID_19_PROVINCE_LOOKUP_DATABASE_USER'] %>
+  password: <%= ENV['COVID_19_PROVINCE_LOOKUP_DATABASE_PASSWORD'] %>
+  host: <%= ENV['COVID_19_PROVINCE_LOOKUP_DATABASE_HOST'] %>
