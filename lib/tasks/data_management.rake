@@ -8,25 +8,28 @@ namespace :data_management do
   desc "Import data from github directory"
   task :import_data, [:init_date_string] => :environment do |t, args|
     include DataManagement
+    logger = Logger.new("./log/import_data_task.log")
 
     init_date_string = INIT_DATE_STRING
     if args[:init_date_string].present?
       init_date_string = args[:init_date_string]
     end
 
-    import_all_data(init_date_string, REPOSITORY_BASE_URL)
+    import_all_data(init_date_string, REPOSITORY_BASE_URL, logger)
   end
 
   desc "Import today data from github directory"
   task :import_today_data => :environment do |t|
     include DataManagement
     init_date_string = "#{DateTime.now.day}/#{DateTime.now.month}/#{DateTime.now.year}"
-    import_all_data(init_date_string, REPOSITORY_BASE_URL)
+    logger = Logger.new("./log/import_#{init_date_string}_data_task.log")
+    import_all_data(init_date_string, REPOSITORY_BASE_URL, logger)
   end
 
   module DataManagement
 
-    def import_all_data(init_date_string, file_base_url)
+    def import_all_data(init_date_string, file_base_url, logger)
+      puts "Task started for init date: #{init_date_string}."
       exit_loop = false
       date = DateTime.parse(init_date_string)
 
@@ -41,7 +44,7 @@ namespace :data_management do
         file_name_tail = "#{date.year}#{date_month}#{date_day}.csv"
         file_url = "#{file_base_url}#{file_name_tail}"
 
-        puts "Importing data from #{date_day}/#{date_month}/#{date.year}..."
+        logger.info "Importing data from #{date_day}/#{date_month}/#{date.year}"
         begin
           URI.open(file_url) do |file|
             begin
@@ -59,24 +62,32 @@ namespace :data_management do
                 data << line_data
               end
             rescue CSV::MalformedCSVError => error
-              puts "ERROR: malformed CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
+              logger.warning "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
             end
           end
-          puts "Data acquired."
+          logger.info "Data acquired"
         rescue OpenURI::HTTPError => error
-          puts "WARNING: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
+          logger.warning "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
         end
 
         date += 1.day
         exit_loop = (date.to_s.split("T").first == DateTime.tomorrow.to_s.split("T").first)
       end
 
-      puts "Bulk inserting all collected data..."
-      Nation.insert_all(nations)
-      Region.insert_all(regions)
-      Province.insert_all(provinces)
-      EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
-      puts "Bulk insertion done."
+      logger.info "Bulk inserting all collected data"
+      ActiveRecord::Base.transaction do
+        begin
+          Nation.insert_all(nations)
+          Region.insert_all(regions)
+          Province.insert_all(provinces)
+          EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
+          logger.info "Bulk insertion done"
+          puts "\e[32mTask ended succesfully :)\e[0m"
+        rescue => e
+          logger.error "DB TRANSACTION FAILED: #{e.message}\n#{e.backtrace.join("\n")} "
+          puts "\e[31mTask failed :(\e[0m"
+        end
+      end
     end
 
     def get_data(line)
