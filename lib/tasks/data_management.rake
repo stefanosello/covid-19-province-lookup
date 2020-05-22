@@ -62,12 +62,12 @@ namespace :data_management do
                 data << line_data
               end
             rescue CSV::MalformedCSVError => error
-              logger.warning "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
+              logger.warn "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
             end
           end
           logger.info "Data acquired"
         rescue OpenURI::HTTPError => error
-          logger.warning "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
+          logger.warn "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
         end
 
         date += 1.day
