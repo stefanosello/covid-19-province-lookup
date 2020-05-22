@@ -77,8 +77,8 @@ namespace :data_management do
       logger.info "Bulk inserting all collected data"
       ActiveRecord::Base.transaction do
         begin
-          Nation.insert_all(nations, unique_by: "code")
-          Region.insert_all(regions, unique_by: "code")
+          Nation.insert_all(nations, unique_by: :code)
+          Region.insert_all(regions, unique_by: :code)
           Province.insert_all(provinces, unique_by: "code")
           EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
           logger.info "Bulk insertion done"
