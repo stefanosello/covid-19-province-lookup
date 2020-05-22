@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_05_21_125002) do
+ActiveRecord::Schema.define(version: 2020_05_22_101825) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(version: 2020_05_21_125002) do
   create_table "nations", primary_key: "code", id: :string, force: :cascade do |t|
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["code"], name: "index_nations_on_code", unique: true
   end
 
   create_table "provinces", primary_key: "code", id: :string, force: :cascade do |t|
@@ -36,6 +37,7 @@ ActiveRecord::Schema.define(version: 2020_05_21_125002) do
     t.float "longitude"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["code"], name: "index_provinces_on_code", unique: true
     t.index ["initials"], name: "index_provinces_on_initials", unique: true
     t.index ["label"], name: "index_provinces_on_label"
     t.index ["latitude", "longitude"], name: "index_provinces_on_latitude_and_longitude"
@@ -46,6 +48,7 @@ ActiveRecord::Schema.define(version: 2020_05_21_125002) do
     t.string "nation_code"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["code"], name: "index_regions_on_code", unique: true
     t.index ["label"], name: "index_regions_on_label", unique: true
   end
 
