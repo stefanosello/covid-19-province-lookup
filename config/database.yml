@@ -1,17 +1,27 @@
-development:
+default: &default
   adapter: postgresql
+  encoding: unicode
+  # For details on connection pooling, see Rails configuration guide
+  # https://guides.rubyonrails.org/configuring.html#database-pooling
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
   database: covid_19_province_lookup_development
   username: stefano
   password: stefano
-  encoding: unicode
   host: localhost
-  pool: 5
 
 test:
-  adapter: postgresql
+  <<: *default
   database: covid_19_province_lookup_development
   username: stefano
   password: stefano
-  encoding: unicode
   host: localhost
-  pool: 5
+
+production:
+  <<: *default
+  database: daj1sov8u0uvkr
+  username: kkvaouceqssaxf
+  password: <%= ENV['DATABASE_PASSWORD'] %>
+  host: ec2-176-34-97-213.eu-west-1.compute.amazonaws.com
