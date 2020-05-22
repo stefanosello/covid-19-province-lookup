@@ -63,6 +63,13 @@ namespace :data_management do
               end
             rescue CSV::MalformedCSVError => error
               logger.warn "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
+              # not known epidemic state callback
+              provinces.each do |province|
+                data << get_data({
+                  'codice_provincia' => province[:code],
+                  'data' => date
+                })
+              end
             end
           end
           logger.info "Data acquired"
