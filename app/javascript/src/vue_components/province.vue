@@ -14,7 +14,6 @@ export default {
     }
   },
   mounted() {
-    console.log("province mounted");
     Vue.nextTick(() => {
       const ctx = document.getElementById(`province-${this.data.province.code}-chart`).getContext('2d');
       this.chart = new Chart(ctx, {
@@ -50,11 +49,14 @@ export default {
 </script>
 
 <template>
-  <div id="province">
+  <div id="province" class="container">
     <canvas :id="`province-${data.province.code}-chart`" width="400" height="400"></canvas>
+    <button class="btn btn-primary mx-auto my-4">OK, THX</button>
   </div>
 </template>
 
 <style lang="scss">
-  
+  canvas {
+    max-height: 100vh;
+  }
 </style>

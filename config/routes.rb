@@ -3,4 +3,11 @@ Rails.application.routes.draw do
   root to: "landing_page#index"
 
   get "provinces/:province", to: 'provinces#show'
+
+  namespace :api do
+    namespace :v1 do
+      get 'epidemic-data/:province', to: 'epidemic_data#get_by_province', defaults: {format: 'json'}
+      get 'geo-data(/:nation)(/:region)', to: 'geo_data#get', defaults: {format: 'json'} 
+    end
+  end
 end
