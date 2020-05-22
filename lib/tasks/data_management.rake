@@ -22,7 +22,7 @@ namespace :data_management do
   task :import_today_data => :environment do |t|
     include DataManagement
     init_date_string = "#{DateTime.now.day}/#{DateTime.now.month}/#{DateTime.now.year}"
-    logger = Logger.new("./log/import_#{init_date_string}_data_task.log")
+    logger = Logger.new("./log/import_#{init_date_string.gsub(/\//, '-')}_data_task.log")
     import_all_data(init_date_string, REPOSITORY_BASE_URL, logger)
   end
 
