@@ -50,13 +50,13 @@ namespace :data_management do
             begin
               CSV.read(file, :headers => :first_row).each do |line|
                 line_nation = get_nation(line)
-                nations << line_nation if !nations.include?(line_nation)
+                nations << line_nation if !nations.map{|nation| nation["code"]}.include?(line_nation["code"])
 
                 line_region = get_region(line)
-                regions << line_region if !regions.include?(line_region)
+                regions << line_region if !regions.map{|region| region["code"]}.include?(line_region["code"])
 
                 line_province = get_province(line)
-                provinces << line_province if !provinces.include?(line_province)
+                provinces << line_province if !provinces.map{|province| province["code"]}.include?(line_province["code"])
                 
                 line_data = get_data(line)
                 data << line_data
@@ -77,9 +77,9 @@ namespace :data_management do
       logger.info "Bulk inserting all collected data"
       ActiveRecord::Base.transaction do
         begin
-          Nation.insert_all(nations)
-          Region.insert_all(regions)
-          Province.insert_all(provinces)
+          Nation.insert_all(nations, unique_by: "code")
+          Region.insert_all(regions, unique_by: "code")
+          Province.insert_all(provinces, unique_by: "code")
           EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
           logger.info "Bulk insertion done"
           puts "\e[32mTask ended succesfully :)\e[0m"
