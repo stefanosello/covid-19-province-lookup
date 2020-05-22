@@ -1,1 +1,15 @@
-$primary: #23FF67;
+.ar-16by9 {
+  padding-bottom: 56.25%;
+}
+
+.position-absolute-center {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
