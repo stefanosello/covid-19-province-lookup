@@ -8,27 +8,25 @@ namespace :data_management do
   desc "Import data from github directory"
   task :import_data, [:init_date_string] => :environment do |t, args|
     include DataManagement
-    logger = Logger.new("./log/import_data_task.log")
 
     init_date_string = INIT_DATE_STRING
     if args[:init_date_string].present?
       init_date_string = args[:init_date_string]
     end
 
-    import_all_data(init_date_string, REPOSITORY_BASE_URL, logger)
+    import_all_data(init_date_string, REPOSITORY_BASE_URL)
   end
 
   desc "Import today data from github directory"
   task :import_today_data => :environment do |t|
     include DataManagement
     init_date_string = "#{DateTime.now.day}/#{DateTime.now.month}/#{DateTime.now.year}"
-    logger = Logger.new("./log/import_#{init_date_string.gsub(/\//, '-')}_data_task.log")
-    import_all_data(init_date_string, REPOSITORY_BASE_URL, logger)
+    import_all_data(init_date_string, REPOSITORY_BASE_URL)
   end
 
   module DataManagement
 
-    def import_all_data(init_date_string, file_base_url, logger)
+    def import_all_data(init_date_string, file_base_url)
       puts "Task started for init date: #{init_date_string}."
       exit_loop = false
       date = DateTime.parse(init_date_string)
@@ -44,7 +42,7 @@ namespace :data_management do
         file_name_tail = "#{date.year}#{date_month}#{date_day}.csv"
         file_url = "#{file_base_url}#{file_name_tail}"
 
-        logger.info "Importing data from #{date_day}/#{date_month}/#{date.year}"
+        Rails.logger.info "Importing data from #{date_day}/#{date_month}/#{date.year}"
         begin
           URI.open(file_url) do |file|
             begin
@@ -62,7 +60,7 @@ namespace :data_management do
                 data << line_data
               end
             rescue CSV::MalformedCSVError => error
-              logger.warn "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
+              Rails.logger.warn "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
               # not known epidemic state callback
               provinces.each do |province|
                 data << get_data({
@@ -72,29 +70,29 @@ namespace :data_management do
               end
             end
           end
-          logger.info "Data acquired"
+          Rails.logger.info "Data acquired"
         rescue OpenURI::HTTPError => error
-          logger.warn "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
+          Rails.logger.warn "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
         end
 
         date += 1.day
         exit_loop = (date.to_s.split("T").first == DateTime.tomorrow.to_s.split("T").first)
       end
 
-      logger.info "Bulk inserting all collected data"
-      logger.debug "Nations: #{nations.map{|n| n[:code]}.join(", ")}"
-      logger.debug "Regions: #{regions.map{|r| r[:code]}.join(", ")}"
-      logger.debug "Provinces: #{provinces.map{|p| p[:code]}.join(", ")}"
+      Rails.logger.info "Bulk inserting all collected data"
+      Rails.logger.debug "Nations: #{nations.map{|n| n[:code]}.join(", ")}"
+      Rails.logger.debug "Regions: #{regions.map{|r| r[:code]}.join(", ")}"
+      Rails.logger.debug "Provinces: #{provinces.map{|p| p[:code]}.join(", ")}"
       ActiveRecord::Base.transaction do
         begin
           Nation.insert_all(nations, unique_by: :code)
           Region.insert_all(regions, unique_by: :code)
           Province.insert_all(provinces, unique_by: :code)
           EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
-          logger.info "Bulk insertion done"
+          Rails.logger.info "Bulk insertion done"
           puts "\e[32mTask ended succesfully :)\e[0m"
         rescue => e
-          logger.error "DB TRANSACTION FAILED: #{e.message}\n#{e.backtrace.join("\n")} "
+          Rails.logger.error "DB TRANSACTION FAILED: #{e.message}\n#{e.backtrace.join("\n")} "
           puts "\e[31mTask failed :(\e[0m"
         end
       end
