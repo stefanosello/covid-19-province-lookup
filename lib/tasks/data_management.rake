@@ -81,7 +81,7 @@ namespace :data_management do
 
       Rails.logger.info "Bulk inserting all collected data"
       Rails.logger.debug "Nations: #{nations.any? ? nations.map{|n| n[:code]}.join(", ") : 'none'}"
-      Rails.logger.debug "Regions: #{regions.any ? regions.map{|r| r[:code]}.join(", ") : 'none'}"
+      Rails.logger.debug "Regions: #{regions.any? ? regions.map{|r| r[:code]}.join(", ") : 'none'}"
       Rails.logger.debug "Provinces: #{provinces.any? ? provinces.map{|p| p[:code]}.join(", ") : 'none'}"
       ActiveRecord::Base.transaction do
         begin
