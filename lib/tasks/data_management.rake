@@ -80,15 +80,23 @@ namespace :data_management do
       end
 
       Rails.logger.info "Bulk inserting all collected data"
-      Rails.logger.debug "Nations: #{nations.map{|n| n[:code]}.join(", ")}"
-      Rails.logger.debug "Regions: #{regions.map{|r| r[:code]}.join(", ")}"
-      Rails.logger.debug "Provinces: #{provinces.map{|p| p[:code]}.join(", ")}"
+      Rails.logger.debug "Nations: #{nations.any? ? nations.map{|n| n[:code]}.join(", ") : 'none'}"
+      Rails.logger.debug "Regions: #{regions.any ? regions.map{|r| r[:code]}.join(", ") : 'none'}"
+      Rails.logger.debug "Provinces: #{provinces.any? ? provinces.map{|p| p[:code]}.join(", ") : 'none'}"
       ActiveRecord::Base.transaction do
         begin
-          Nation.insert_all(nations, unique_by: :code)
-          Region.insert_all(regions, unique_by: :code)
-          Province.insert_all(provinces, unique_by: :code)
-          EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
+          if nations.any?
+            Nation.insert_all(nations, unique_by: :code)
+          end
+          if regions.any?
+            Region.insert_all(regions, unique_by: :code)
+          end
+          if provinces.any?
+            Province.insert_all(provinces, unique_by: :code)
+          end
+          if data.any?
+            EpidemicData.upsert_all(data, unique_by: %i[ date province_code ])
+          end
           Rails.logger.info "Bulk insertion done"
           puts "\e[32mTask ended succesfully :)\e[0m"
         rescue => e
