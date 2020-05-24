@@ -62,6 +62,9 @@ export default {
               opacity: 0.2
             }
           ]
+        },
+        chartExportMenu: {
+          visible: false  // default is true.
         }
       }
     }
@@ -79,6 +82,8 @@ export default {
             name: data.province.label,
             data: data.total_cases,
           });
+        },
+        complete: () => {
           this.loading = false;
         }
       })
@@ -88,12 +93,12 @@ export default {
 </script>
 
 <template>
-  <div id="province" class="container-fluid" landing-page-component>
+  <div class="container-fluid" landing-page-component>
     <div class="row">
       <div class="col-12 col-lg-8 col-xl-9 px-0 d-flex flex-column align-items-center">
         <navbar @open-sidebar="isSidebarOpen = true"></navbar>
         <div class="container">
-          <line-chart v-if="datasets.length > 0" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
+          <line-chart v-if="true" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
           <div class="py-3 py-md-5" v-else>
             <div class="display-1 mb-5">Ciao :)</div>
             <div> Sono Stefano, uno studente di informatica e programmatore web che in quarantena aveva voglia di sviluppare qualcosa.
@@ -103,7 +108,7 @@ export default {
             </div>
           </div>
         </div>
-        <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
+        <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
           <div v-if="loading" class="position-absolute-center spinner-layer d-flex justify-content-center align-items-center">
             <div class="loadingio-spinner-pulse-rjn9w6gyclb">
               <div class="ldio-4twfh71h4gi">
@@ -120,11 +125,11 @@ export default {
       </div>
     </div>
 
-    <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
-      <div class="d-lg-none sidebar-layer" v-if="isSidebarOpen"></div>
+    <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
+      <div class="d-lg-none sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
     </transition>
 
-    <transition enter-active-class="animate__animated animate__slideInRight" leave-active-class="animate__animated animate__slideOutRight">
+    <transition enter-active-class="animate__animated animate__slideInRight animate__fast" leave-active-class="animate__animated animate__slideOutRight animate__fast">
       <div class="d-lg-none sidebar-container" v-if="isSidebarOpen">
         <sidebar :nation="nation" @remove-province="removeProvince" @add-province="addProvince" @close="isSidebarOpen = false"></sidebar>
       </div>

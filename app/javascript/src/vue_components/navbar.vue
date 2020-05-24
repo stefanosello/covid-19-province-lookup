@@ -19,7 +19,7 @@ export default {
 
 <style lang="scss">
 [navbar-component] {
-  height: 6rem;
+  height: $header-height;
   background-color: $gray-700;
   color: white;
 }
