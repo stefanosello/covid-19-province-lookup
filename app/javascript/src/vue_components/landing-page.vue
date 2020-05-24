@@ -98,7 +98,7 @@ export default {
       <div class="col-12 col-lg-8 col-xl-9 px-0 d-flex flex-column align-items-center">
         <navbar @open-sidebar="isSidebarOpen = true"></navbar>
         <div class="container">
-          <line-chart v-if="true" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
+          <line-chart v-if="datasets.length > 0" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
           <div class="py-3 py-md-5" v-else>
             <div class="display-1 mb-5">Ciao :)</div>
             <div> Sono Stefano, uno studente di informatica e programmatore web che in quarantena aveva voglia di sviluppare qualcosa.
