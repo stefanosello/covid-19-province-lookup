@@ -13,3 +13,9 @@
 .cursor-pointer {
   cursor: pointer;
 }
+
+.deco-none {
+  &:hover {
+    text-decoration: none;
+  }
+}

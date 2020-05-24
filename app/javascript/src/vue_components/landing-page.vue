@@ -1,5 +1,6 @@
 <script type="text/javascript">
-import Chart from 'chart.js';
+import 'tui-chart/dist/tui-chart.css'
+import { lineChart } from '@toast-ui/vue-chart'
 
 export default {
   props: {
@@ -12,119 +13,138 @@ export default {
       default: () => []
     }
   },
+  components: {
+    'line-chart': lineChart
+  },
   data() {
     return {
-      chart: null,
-      datasets: []
+      datasets: [],
+      isSidebarOpen: false
     }
   },
-  mounted() {
-    this.initChart();
-  },
+  mounted() { },
   computed: {
-    chartData() {
+    totalCasesChartData() {
       return {
-        labels: this.dates.map((date) => (new Date(date)).toLocaleDateString()),
-        datasets: this.datasets,
+        categories: this.dates.map((date) => (new Date(date)).toLocaleDateString()),
+        series: this.datasets,
       }
     },
-    chartOptions() {
+    totalCasesChartOptions() {
       return {
-        animation: {
-          duration: 0
+        chart: {
+          width: 1108,
+          height: 540,
+          title: 'Covid-19: casi totali per provincia'
+        },
+        yAxis: {
+          title: 'Numero di casi',
+        },
+        xAxis: {
+          title: 'Giorno',
+          pointOnColumn: true,
+          dateFormat: 'MMM',
+          tickInterval: 'auto'
+        },
+        series: {
+          showDot: false,
+          zoomable: true
+        },
+        plot: {
+          bands: [
+            {
+              range: [
+                (new Date(this.dates[0])).toLocaleDateString(),
+                (new Date(this.dates[this.dates.length - 1])).toLocaleDateString()
+              ],
+              color: 'gray',
+              opacity: 0.2
+            }
+          ]
         }
       }
     }
   },
   methods: {
-    isProvinceDrawned(province) {
-      return this.datasets.filter(data => data.initials === province).length > 0;
+    removeProvince(province) {
+      this.datasets = this.datasets.filter(data => data.name != province.label)
     },
-    toggleProvince(province) {
-      this.chart.destroy();
-      if (this.isProvinceDrawned(province)) {
-        this.datasets = this.datasets.filter(data => data.initials != province);
-        this.initChart();
-      } else {
-        this.loadData(province);
-      }
-    },
-    loadData(province) {
+    addProvince(province) {
       $.get({
-        url: `/api/v1/epidemic-data/${province}`,
+        url: `/api/v1/epidemic-data/${province.initials}`,
         success: (data) => {
-          const color = this.getRandomColor();
           this.datasets.push({
-            label: data.province.label,
+            name: data.province.label,
             data: data.total_cases,
-            initials: data.province.initials,
-            fill: false,
-            backgroundColor: color,
-            borderColor: color
           });
-          this.initChart();
         }
       })
-    },
-    initChart() {
-      Vue.nextTick(() => {
-        const ctx = document.getElementById("provinces-chart").getContext('2d');
-        this.chart = new Chart(ctx, {
-          type: 'line',
-          data: this.chartData,
-          options: this.chartOptions
-        });
-      });
-    },
-    getRandomColor() {
-      const letters = '0123456789ABCDEF';
-      let color = '#';
-      for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-      }
-      return color;
     }
   }
 }
 </script>
 
 <template>
-  <div id="province" class="container">
-    <h1 class="text-center my-5">Great title - Covid-19</h1>
-
-    <div class="my-5">
-      <button class="btn btn-primary w-100 text-center" type="button" data-toggle="collapse" data-target="#chooseProvinces" aria-expanded="false" aria-controls="chooseProvinces">
-        Choose province to show
-      </button>
-      <div class="collapse" id="chooseProvinces">
-        <div class="card card-body p-4">
-          <div v-for="(region, region_index) in nation.regions" :key="`region-${region.code}`" class="py-2">
-            <a data-toggle="collapse" :href="`#collapse-region-${region.code}`" aria-expanded="false" :aria-controls="`collapse-region-${region.code}`">
-              {{region.label}}
-            </a>
-            <div :id="`collapse-region-${region.code}`" class="collapse">
-              <div class="py-4 d-flex flex-wrap">
-                <button
-                  v-for="(province, province_index) in region.provinces"
-                  :key="`province-${province.initials}`"
-                  class="btn m-2"
-                  @click="toggleProvince(province.initials)"
-                  :class="isProvinceDrawned(province.initials) ? 'btn-primary' : 'btn-outline-primary'"
-                >
-                  {{province.label}}
-                </button>
-              </div>
+  <div id="province" class="container-fluid" landing-page-component>
+    <div class="row">
+      <div class="col-12 col-lg-8 col-xl-9 px-0 d-flex flex-column align-items-center">
+        <navbar @open-sidebar="isSidebarOpen = true"></navbar>
+        <div class="container">
+          <line-chart v-if="datasets.length > 0" ref="totalCasesChart" class="chart py-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
+          <div class="py-5" v-else>
+            <div class="display-1 mb-5">Ciao :)</div>
+            <div> Sono Stefano, uno studente di informatica e programmatore web che in quarantena aveva voglia di sviluppare qualcosa.
+              Dal momento che sono un fissato coi dati, e che i canali ufficiali mi fornivano i dati sull'andamento dei contagi a livello provinciale, ma non me li 
+              facevano visualizzare con dei grafici, ho deciso di mettere qui la possibilità di farlo, mettendo anche a confronto i grafici di varie province.
+              Dalla spalla di destra è possibile selezionare le province, raggruppate per regioni, di cui si vogliono visualizzare i dati. Buona consultazione ;)
             </div>
           </div>
         </div>
       </div>
+      <div class="d-none d-lg-block col-lg-4 col-xl-3 px-0">
+        <sidebar :nation="nation" @remove-province="removeProvince" @add-province="addProvince"></sidebar>
+      </div>
     </div>
 
-    <div class="ar-16by9 w-100 position-relative">
-      <canvas id="provinces-chart" class="position-absolute-center"></canvas>
-    </div>
+    <transition enter-active-class="animate__animated animate__fadeIn" leave-active-class="animate__animated animate__fadeOut">
+      <div class="d-lg-none sidebar-layer" v-if="isSidebarOpen"></div>
+    </transition>
+
+    <transition enter-active-class="animate__animated animate__slideInRight" leave-active-class="animate__animated animate__slideOutRight">
+      <div class="d-lg-none sidebar-container" v-if="isSidebarOpen">
+        <sidebar :nation="nation" @remove-province="removeProvince" @add-province="addProvince" @close="isSidebarOpen = false"></sidebar>
+      </div>
+    </transition>
   </div>
 </template>
 
 <style lang="scss">
+[landing-page-component] {
+  .chart {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .sidebar-container,
+  .sidebar-layer {
+    position: fixed;
+  }
+
+  .sidebar-layer {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba($gray-100, .7);
+  }
+
+  .sidebar-container {
+    position: fixed;
+    z-index: calc(#{$chart-zindex} + 2);
+    top: 0;
+    right: 0;
+    width: 80vw;
+    height: 100vh;
+  }
+}
 </style>

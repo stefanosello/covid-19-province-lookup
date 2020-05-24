@@ -17,7 +17,7 @@ class Api::V1::GeoDataController < ApplicationController
       nation_converted = nation.as_json
       nation_converted["regions"] = nation.regions.map do |region|
         region_converted = region.as_json
-        region_converted["provinces"] = region.provinces.map {|province| province.as_json}
+        region_converted["provinces"] = region.provinces.map{|province| province.as_json}.select{|province| province['initials'].present?}
         region_converted
       end
       response << nation_converted

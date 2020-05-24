@@ -9,7 +9,7 @@ class LandingPageController < ApplicationController
     @nation = nation.as_json
     @nation["regions"] = nation.regions.map do |region|
       region_converted = region.as_json
-      region_converted["provinces"] = region.provinces.map {|province| province.as_json}
+      region_converted["provinces"] = region.provinces.map {|province| province.as_json}.select{|province| province['initials'].present?}
       region_converted
     end
 
