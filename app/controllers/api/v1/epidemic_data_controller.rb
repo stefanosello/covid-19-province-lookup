@@ -21,7 +21,7 @@ class Api::V1::EpidemicDataController < ApplicationController
         delta_cases << 0
       end
     end
-
+    
     response = {
       "province" => province,
       "dates" => epidemic_data.map{|epidemic| epidemic.date},

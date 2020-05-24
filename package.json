@@ -8,6 +8,7 @@
     "@rails/webpacker": "4.2.2",
     "@toast-ui/vue-chart": "^1.1.2",
     "animate.css": "^4.1.0",
+    "body-scroll-lock": "^3.0.2",
     "bootstrap": "^4.5.0",
     "jquery": "^3.5.1",
     "lodash": "^4.17.15",

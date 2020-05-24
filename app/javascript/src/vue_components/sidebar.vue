@@ -1,4 +1,5 @@
 <script type="text/javascript">
+import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 export default {
   props: {
@@ -12,7 +13,12 @@ export default {
       regions: this.nation.regions
     }
   },
-  mounted() { },
+  mounted() {
+    disableBodyScroll(this.$el);
+  },
+  destroyed() {
+    clearAllBodyScrollLocks();
+  },
   computed: { },
   methods: {
     toggleProvince(region_index, province_index) {
@@ -31,20 +37,22 @@ export default {
 
 <template>
   <div class="w-100" sidebar-component>
-    <div class="card-body p-3 p-xl-5 d-flex flex-wrap position-relative">
+    <div class="card-body p-3 p-xl-5 position-relative">
       <span class="close-icon font-weight-bold cursor-pointer position-absolute d-lg-none" @click="$emit('close')">&times</span>
-      <h4 class="font-weight-bold pr-4"> Seleziona le province di interesse</h4>
-      <div v-for="(region, region_index) in regions" :key="`region-${region.code}`" class="dropdown">
-        <button data-toggle="dropdown" class="btn btn-secondary font-weight-bold m-2 dropdown-toggle">
-          {{region.label}}
-        </button>
-        <div class="dropdown-menu">
-          <div class="px-2" v-for="(province, province_index) in region.provinces">
-            <div class="custom-control custom-checkbox">
-              <input type="checkbox" class="custom-control-input" :id="`checkbox-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
-              <label class="custom-control-label" :for="`checkbox-${province.label}`">{{province.label}}</label>
-            </div>
-          </div>        
+      <div class="alert alert-primary font-weight-bold mr-5 px-3"> Seleziona le province di interesse</div>
+      <div class="mx-n2 w-100 d-flex flex-wrap">
+        <div v-for="(region, region_index) in regions" :key="`region-${region.code}`" class="dropdown">
+          <button data-toggle="dropdown" class="btn btn-sm btn-outline-secondary text-uppercase m-2 dropdown-toggle">
+            {{region.label}}
+          </button>
+          <div class="dropdown-menu">
+            <div class="px-2" v-for="(province, province_index) in region.provinces">
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" class="custom-control-input" :id="`checkbox-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
+                <label class="custom-control-label" :for="`checkbox-${province.label}`">{{province.label}}</label>
+              </div>
+            </div>        
+          </div>
         </div>
       </div>
     </div>
@@ -75,6 +83,14 @@ export default {
     top: 1.5rem;
     font-size: 2rem;
     line-height: 0;
+  }
+
+  .btn {
+    border-radius: 3rem;
+  }
+
+  .btn-outline-secondary {
+    background-color: rgba($secondary, .15);
   }
 }
 </style>
