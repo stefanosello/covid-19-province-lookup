@@ -21,6 +21,24 @@ namespace :data_management do
   task :import_today_data => :environment do |t|
     include DataManagement
     init_date_string = "#{DateTime.now.day}/#{DateTime.now.month}/#{DateTime.now.year}"
+    
+    #check for file availability
+    attempt = 0
+    available = false
+    file_url = "#{REPOSITORY_BASE_URL}#{get_filename(DateTime.now)}"
+    while !available
+      begin
+        attempt += 1
+        URI.open(file_url)
+        available = true
+      rescue OpenURI::HTTPError => error
+        available = false
+        Rails.logger.warn "TODAY FILE MISSING: at #{DateTime.now} today file is still missing - attempt ##{attempt}"
+        puts "here"
+        sleep 60
+      end
+    end
+
     import_all_data(init_date_string, REPOSITORY_BASE_URL)
   end
 
@@ -37,12 +55,10 @@ namespace :data_management do
       provinces = Array.new
 
       while !exit_loop
-        date_month = date.month > 9 ? "#{date.month}" : "0#{date.month}"
-        date_day = date.day > 9 ? "#{date.day}" : "0#{date.day}"
-        file_name_tail = "#{date.year}#{date_month}#{date_day}.csv"
+        file_name_tail = get_filename(date)
         file_url = "#{file_base_url}#{file_name_tail}"
 
-        Rails.logger.info "Importing data from #{date_day}/#{date_month}/#{date.year}"
+        Rails.logger.info "Importing data from #{file_name_tail}"
         begin
           URI.open(file_url) do |file|
             begin
@@ -147,6 +163,12 @@ namespace :data_management do
         created_at: DateTime.now,
         updated_at: DateTime.now
       }
+    end
+
+    def get_filename(date)
+      date_month = date.month > 9 ? "#{date.month}" : "0#{date.month}"
+      date_day = date.day > 9 ? "#{date.day}" : "0#{date.day}"
+      "#{date.year}#{date_month}#{date_day}.csv"
     end
 
   end
