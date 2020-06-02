@@ -1,6 +1,7 @@
 <script type="text/javascript">
 import 'tui-chart/dist/tui-chart.css'
 import { lineChart } from '@toast-ui/vue-chart'
+import { merge } from 'lodash'
 
 export default {
   props: {
@@ -20,10 +21,28 @@ export default {
     return {
       datasets: [],
       isSidebarOpen: false,
-      loading: false
+      loading: true,
+      nationData: this.nation
     }
   },
-  mounted() { },
+  mounted() {
+    $.get({
+      url: `http://ip-api.com/json/`,
+      success: (ip_data) => {
+        console.log(ip_data);
+        $.get({
+          url: `/api/v1/geo-data/ITA/${ip_data.regionName}`,
+          success: (data) => {
+            const regionIndex = this.nationData.regions.findIndex(region => region.label === data[0].regions[0].label);
+            data[0].regions[0].provinces.forEach((province, index) => {
+              this.addProvince(province);
+              Vue.set(this.nationData.regions[regionIndex].provinces[index], "drawned", true);
+            })
+          }
+        })
+      }
+    });
+  },
   computed: {
     totalCasesChartData() {
       return {
@@ -95,18 +114,10 @@ export default {
 <template>
   <div class="container-fluid" landing-page-component>
     <div class="row">
-      <div class="col-12 col-lg-8 col-xl-9 px-0 d-flex flex-column align-items-center">
+      <div class="col-12 px-0 d-flex flex-column align-items-center">
         <navbar @open-sidebar="isSidebarOpen = true"></navbar>
-        <div class="container">
-          <line-chart v-if="datasets.length > 0" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
-          <div class="py-3 py-md-5" v-else>
-            <div class="display-1 mb-5">Ciao :)</div>
-            <div> Sono Stefano, uno studente di informatica e programmatore web che in quarantena aveva voglia di sviluppare qualcosa.
-              Dal momento che sono un fissato coi dati, e che i canali ufficiali mi fornivano i dati sull'andamento dei contagi a livello provinciale, ma non me li 
-              facevano visualizzare con dei grafici, ho deciso di mettere qui la possibilità di farlo, mettendo anche a confronto i grafici di varie province.
-              Dalla spalla di destra è possibile selezionare le province, raggruppate per regioni, di cui si vogliono visualizzare i dati. Buona consultazione ;)
-            </div>
-          </div>
+        <div class="container chart-container">
+          <line-chart v-if="datasets.length > 0 && !loading" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
         </div>
         <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
           <div v-if="loading" class="position-absolute-center spinner-layer d-flex justify-content-center align-items-center">
@@ -120,18 +131,15 @@ export default {
           </div>
         </transition>
       </div>
-      <div class="d-none d-lg-block col-lg-4 col-xl-3 px-0">
-        <sidebar :nation="nation" @remove-province="removeProvince" @add-province="addProvince"></sidebar>
-      </div>
     </div>
 
     <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
-      <div class="d-lg-none sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
+      <div class="sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
     </transition>
 
     <transition enter-active-class="animate__animated animate__slideInRight animate__fast" leave-active-class="animate__animated animate__slideOutRight animate__fast">
-      <div class="d-lg-none sidebar-container" v-if="isSidebarOpen">
-        <sidebar :nation="nation" @remove-province="removeProvince" @add-province="addProvince" @close="isSidebarOpen = false"></sidebar>
+      <div class="sidebar-container" v-if="isSidebarOpen">
+        <sidebar :nation="nationData" @remove-province="removeProvince" @add-province="addProvince" @close="isSidebarOpen = false"></sidebar>
       </div>
     </transition>
   </div>
@@ -139,6 +147,11 @@ export default {
 
 <style lang="scss">
 [landing-page-component] {
+
+  .chart-container {
+    min-height: calc(100vh - #{$header-height});
+  }
+
   .chart {
     max-width: 100%;
     overflow-x: auto;
@@ -168,6 +181,18 @@ export default {
     right: 0;
     width: 80vw;
     height: 100vh;
+
+    @include media-breakpoint-up(md) {
+      width: 50vw;
+    }
+
+    @include media-breakpoint-up(lg) {
+      width: 35vw;
+    }
+
+    @include media-breakpoint-up(xl) {
+      width: 25vw;
+    }
   }
 
   /* spinner animation */
@@ -211,8 +236,8 @@ export default {
     height: 200px;
     display: inline-block;
     overflow: hidden;
-    background: #ffffff;
   }
+
   .ldio-4twfh71h4gi {
     width: 100%;
     height: 100%;

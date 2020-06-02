@@ -37,9 +37,9 @@ export default {
 
 <template>
   <div class="w-100" sidebar-component>
-    <div class="card-body p-3 p-xl-5 position-relative">
-      <span class="close-icon font-weight-bold cursor-pointer position-absolute d-lg-none" @click="$emit('close')">&times</span>
-      <div class="alert alert-primary font-weight-bold mr-5 mr-lg-0 px-3"> Seleziona le province di interesse</div>
+    <div class="card-body p-3 px-xl-5 position-relative">
+      <span class="close-icon font-weight-bold cursor-pointer position-absolute" @click="$emit('close')">&times</span>
+      <div class="alert alert-primary font-weight-bold mr-5 px-3"> Seleziona le province di interesse</div>
       <div class="mx-n2 w-100 d-flex flex-wrap">
         <div v-for="(region, region_index) in regions" :key="`region-${region.code}`" class="dropdown">
           <button data-toggle="dropdown" class="btn btn-sm btn-outline-secondary text-uppercase m-2 dropdown-toggle">

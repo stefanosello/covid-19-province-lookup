@@ -34,7 +34,6 @@ namespace :data_management do
       rescue OpenURI::HTTPError => error
         available = false
         Rails.logger.warn "TODAY FILE MISSING: at #{DateTime.now} today file is still missing - attempt ##{attempt}"
-        puts "here"
         sleep 60
       end
     end
@@ -76,7 +75,7 @@ namespace :data_management do
                 data << line_data
               end
             rescue CSV::MalformedCSVError => error
-              Rails.logger.warn "MALFORMED CSV - data import for #{date_day}/#{date_month}/#{date.year} failed."
+              Rails.logger.warn "MALFORMED CSV - data import for #{date.day}/#{date.month}/#{date.year} failed."
               # not known epidemic state callback
               provinces.each do |province|
                 data << get_data({
@@ -88,7 +87,7 @@ namespace :data_management do
           end
           Rails.logger.info "Data acquired"
         rescue OpenURI::HTTPError => error
-          Rails.logger.warn "MISSING DATA: data #{date_day}/#{date_month}/#{date.year} not currently available - skipping import."
+          Rails.logger.warn "MISSING DATA: data #{date.day}/#{date.month}/#{date.year} not currently available - skipping import."
         end
 
         date += 1.day
