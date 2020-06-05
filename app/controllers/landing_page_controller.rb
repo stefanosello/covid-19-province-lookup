@@ -7,13 +7,19 @@ class LandingPageController < ApplicationController
     nation_code = (params["nation"] || DEFAULT_NATION_CODE).upcase
     nation = Nation.includes(regions: :provinces).find(nation_code) 
     @nation = nation.as_json
-    @nation["regions"] = nation.regions.map do |region|
+    @nation["regions"] = Hash.new
+    nation.regions.map do |region|
       region_converted = region.as_json
-      region_converted["provinces"] = region.provinces.map {|province| province.as_json}.select{|province| province['initials'].present?}
-      region_converted
+      region_converted["provinces"] = Hash.new
+      region.provinces.each do |province|
+        if province.initials.present?
+          region_converted["provinces"][province.code] = province
+        end
+      end
+      @nation["regions"][region.code] = region_converted
     end
 
     # time-interval details
-    @dates = EpidemicData.where(province_code: DEFAULT_PROVINCE).group(:date).pluck(:date)
+    @dates = EpidemicData.where(province_code: DEFAULT_PROVINCE).order(:date).group(:date).pluck(:date)
   end
 end

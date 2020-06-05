@@ -15,14 +15,31 @@ class Api::V1::GeoDataController < ApplicationController
     
     nations.each do |nation|
       nation_converted = nation.as_json
-      nation_converted["regions"] = nation.regions.map do |region|
+      nation_converted["regions"] = Hash.new
+      nation.regions.map do |region|
         region_converted = region.as_json
-        region_converted["provinces"] = region.provinces.map{|province| province.as_json}.select{|province| province['initials'].present?}
-        region_converted
-      end
+        region_converted["provinces"] = Hash.new
+        region.provinces.each do |province|
+          if province.initials.present?
+            region_converted["provinces"][province.code] = province
+          end
+        end
+        nation_converted["regions"][region.code] = region_converted
+      end.as_h
       response << nation_converted
     end
 
+
+    respond_to do |format|
+      format.json { render :json => response }
+    end
+  end
+
+  def get_nearest_province
+    latitude = params[:latitude].to_f
+    longitude = params[:longitude].to_f
+
+    response = Province.find_closest(latitude, longitude)
 
     respond_to do |format|
       format.json { render :json => response }

@@ -29,15 +29,12 @@ export default {
     $.get({
       url: `http://ip-api.com/json/`,
       success: (ip_data) => {
-        console.log(ip_data);
         $.get({
-          url: `/api/v1/geo-data/ITA/${ip_data.regionName}`,
+          url: `/api/v1/geo-data/province-by-coords?latitude=${ip_data.lat}&longitude=${ip_data.lon}`,
           success: (data) => {
-            const regionIndex = this.nationData.regions.findIndex(region => region.label === data[0].regions[0].label);
-            data[0].regions[0].provinces.forEach((province, index) => {
-              this.addProvince(province);
-              Vue.set(this.nationData.regions[regionIndex].provinces[index], "drawned", true);
-            })
+            Vue.set(this.nationData["regions"][data.region_code]["provinces"][data.code], "drawned", true);
+            this.addProvince(data);
+            this.loading = false;
           }
         })
       }
