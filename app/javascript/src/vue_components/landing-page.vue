@@ -2,8 +2,6 @@
 import 'tui-chart/dist/tui-chart.css'
 import { lineChart } from '@toast-ui/vue-chart'
 import { merge } from 'lodash'
-const Highcharts = require('highcharts');  
-require('highcharts/modules/exporting')(Highcharts);  
 
 export default {
   props: {
@@ -24,8 +22,7 @@ export default {
       datasets: [],
       isSidebarOpen: false,
       loading: true,
-      nationData: this.nation,
-      chart: null,
+      nationData: this.nation
     }
   },
   mounted() {
@@ -89,27 +86,6 @@ export default {
     }
   },
   methods: {
-    loadHighChart() {
-      Vue.nextTick(() => {
-        this.chart = new Highcharts.chart('highcharts-example', {
-          chart: {
-            scrollablePlotArea: {
-              minWidth: 700
-            }
-          },
-          xAxis: {
-            type: 'datetime'
-          },
-          series: this.datasets.map(data => {
-            const start = new Date(this.dates[0])
-            const end = new Date(this.dates[this.dates.length-1])
-            data.pointStart = start.valueOf();
-            data.pointInterval = 24*3600*1000;
-            return data;
-          })
-        });
-      })
-    },
     removeProvince(province) {
       this.datasets = this.datasets.filter(data => data.name != province.label)
     },
@@ -125,7 +101,6 @@ export default {
         },
         complete: () => {
           this.loading = false;
-          this.loadHighChart();
         }
       })
     }
@@ -140,7 +115,6 @@ export default {
         <navbar @open-sidebar="isSidebarOpen = true"></navbar>
         <div class="container chart-container">
           <line-chart v-if="datasets.length > 0 && !loading" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
-          <div id="highcharts-example"></div>
         </div>
         <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
           <div v-if="loading" class="position-absolute-center spinner-layer d-flex justify-content-center align-items-center">
