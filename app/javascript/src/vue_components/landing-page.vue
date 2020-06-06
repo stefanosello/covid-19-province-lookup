@@ -16,7 +16,7 @@ export default {
       deltaCasesDatasets: [],
       isSidebarOpen: false,
       loading: true,
-      nationData: this.nation,
+      nationData: this.nation
     }
   },
   mounted() {
