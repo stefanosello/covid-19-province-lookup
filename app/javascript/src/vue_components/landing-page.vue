@@ -106,7 +106,7 @@ export default {
       </div>
     </div>
 
-    <div class="row footer d-flex justify-content-center align-items-center">Made with ♥ by <a class="ml-1" target="_blank" href="www.stefanosello.it">Mr5he11</a>.</div>
+    <div class="row footer d-flex justify-content-center align-items-center text-white">Made with ♥ by <a class="ml-1" target="_blank" href="http://www.stefanosello.it">Mr5he11</a>.</div>
 
     <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
       <div class="sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
