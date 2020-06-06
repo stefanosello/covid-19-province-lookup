@@ -18,7 +18,7 @@ class LandingPageController < ApplicationController
       end
       @nation["regions"][region.code] = region_converted
     end
-
+    
     # time-interval details
     @dates = EpidemicData.where(province_code: DEFAULT_PROVINCE).order(:date).group(:date).pluck(:date)
   end

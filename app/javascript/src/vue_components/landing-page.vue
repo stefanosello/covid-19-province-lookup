@@ -1,10 +1,4 @@
 <script type="text/javascript">
-import 'tui-chart/dist/tui-chart.css'
-import { lineChart } from '@toast-ui/vue-chart'
-import { merge } from 'lodash'
-const Highcharts = require('highcharts');  
-require('highcharts/modules/exporting')(Highcharts);  
-
 export default {
   props: {
     nation: {
@@ -16,16 +10,13 @@ export default {
       default: () => []
     }
   },
-  components: {
-    'line-chart': lineChart
-  },
   data() {
     return {
-      datasets: [],
+      totalCasesDatasets: [],
+      deltaCasesDatasets: [],
       isSidebarOpen: false,
       loading: true,
       nationData: this.nation,
-      chart: null,
     }
   },
   mounted() {
@@ -43,89 +34,32 @@ export default {
       }
     });
   },
-  computed: {
-    totalCasesChartData() {
-      return {
-        categories: this.dates.map((date) => (new Date(date)).toLocaleDateString()),
-        series: this.datasets,
-      }
-    },
-    totalCasesChartOptions() {
-      return {
-        chart: {
-          width: 1108,
-          height: 540,
-          title: 'Covid-19: casi totali per provincia'
-        },
-        yAxis: {
-          title: 'Numero di casi',
-        },
-        xAxis: {
-          title: 'Giorno',
-          pointOnColumn: true,
-          dateFormat: 'MMM',
-          tickInterval: 'auto'
-        },
-        series: {
-          showDot: false,
-          zoomable: true
-        },
-        plot: {
-          bands: [
-            {
-              range: [
-                (new Date(this.dates[0])).toLocaleDateString(),
-                (new Date(this.dates[this.dates.length - 1])).toLocaleDateString()
-              ],
-              color: 'gray',
-              opacity: 0.2
-            }
-          ]
-        },
-        chartExportMenu: {
-          visible: false  // default is true.
-        }
-      }
-    }
-  },
+  computed: { },
   methods: {
-    loadHighChart() {
-      Vue.nextTick(() => {
-        this.chart = new Highcharts.chart('highcharts-example', {
-          chart: {
-            scrollablePlotArea: {
-              minWidth: 700
-            }
-          },
-          xAxis: {
-            type: 'datetime'
-          },
-          series: this.datasets.map(data => {
-            const start = new Date(this.dates[0])
-            const end = new Date(this.dates[this.dates.length-1])
-            data.pointStart = start.valueOf();
-            data.pointInterval = 24*3600*1000;
-            return data;
-          })
-        });
-      })
-    },
     removeProvince(province) {
-      this.datasets = this.datasets.filter(data => data.name != province.label)
+      this.loading = true;
+      this.totalCasesDatasets = this.totalCasesDatasets.filter(data => data.name != province.label);
+      this.deltaCasesDatasets = this.deltaCasesDatasets.filter(data => data.name != province.label);
+      Vue.nextTick(() => {
+        this.loading = false;
+      })
     },
     addProvince(province) {
       this.loading = true;
       $.get({
         url: `/api/v1/epidemic-data/${province.initials}`,
         success: (data) => {
-          this.datasets.push({
+          this.totalCasesDatasets.push({
             name: data.province.label,
             data: data.total_cases,
           });
+          this.deltaCasesDatasets.push({
+            name: data.province.label,
+            data: data.delta_cases
+          })
         },
         complete: () => {
           this.loading = false;
-          this.loadHighChart();
         }
       })
     }
@@ -138,9 +72,25 @@ export default {
     <div class="row">
       <div class="col-12 px-0 d-flex flex-column align-items-center">
         <navbar @open-sidebar="isSidebarOpen = true"></navbar>
-        <div class="container chart-container">
-          <line-chart v-if="datasets.length > 0 && !loading" ref="totalCasesChart" class="chart py-3 py-md-5" :options="totalCasesChartOptions" :data="totalCasesChartData"/>
-          <div id="highcharts-example"></div>
+        <div class="p-3 py-md-5 px-md-0 w-100 mh-100vh-header">
+          <div class="container chart-container p-4 p-md-5 mb-3 mb-md-5">
+            <chart
+              v-if="totalCasesDatasets.length > 0 && !loading"
+              chartId="totalsPerProvinceChart"
+              :datasets="totalCasesDatasets"
+              :dates="dates"
+              title="Casi totali per provincia"
+            ></chart>
+          </div>
+          <div class="container chart-container p-4 p-md-5">
+            <chart
+              v-if="deltaCasesDatasets.length > 0 && !loading"
+              chartId="deltaPerProvinceChart"
+              :datasets="deltaCasesDatasets"
+              :dates="dates"
+              title="Variazione giornaliera casi per provincia"
+            ></chart>
+          </div>
         </div>
         <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
           <div v-if="loading" class="position-absolute-center spinner-layer d-flex justify-content-center align-items-center">
@@ -155,6 +105,8 @@ export default {
         </transition>
       </div>
     </div>
+
+    <div class="row footer d-flex justify-content-center align-items-center">Made with ♥ by <a class="ml-1" target="_blank" href="www.stefanosello.it">Mr5he11</a>.</div>
 
     <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
       <div class="sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
@@ -171,13 +123,16 @@ export default {
 <style lang="scss">
 [landing-page-component] {
 
-  .chart-container {
-    min-height: calc(100vh - #{$header-height});
-  }
+  $chart-background-color: whitesmoke;
 
-  .chart {
-    max-width: 100%;
-    overflow-x: auto;
+  .chart-container {
+    border-radius: 2rem;
+    background-color: $chart-background-color;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1);
+
+    .highcharts-background {
+      fill: $chart-background-color !important;
+    }
   }
 
   .sidebar-container,
@@ -216,6 +171,11 @@ export default {
     @include media-breakpoint-up(xl) {
       width: 25vw;
     }
+  }
+
+  .footer {
+    background-color: lighten($gray-700, 25);
+    height: 5rem;
   }
 
   /* spinner animation */

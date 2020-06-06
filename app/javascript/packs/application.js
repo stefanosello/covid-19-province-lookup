@@ -13,6 +13,9 @@ Vue.component('sidebar', Sidebar)
 import Navbar from '../src/vue_components/navbar.vue'
 Vue.component('navbar', Navbar)
 
+import Chart from '../src/vue_components/chart.vue'
+Vue.component('chart', Chart)
+
 import JQuery from 'jquery';
 window.$ = window.JQuery = JQuery;
 
