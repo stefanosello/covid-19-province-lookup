@@ -20,19 +20,27 @@ export default {
     }
   },
   mounted() {
-    $.get({
-      url: `http://ip-api.com/json/`,
-      success: (ip_data) => {
-        $.get({
-          url: `/api/v1/geo-data/province-by-coords?latitude=${ip_data.lat}&longitude=${ip_data.lon}`,
-          success: (data) => {
-            Vue.set(this.nationData["regions"][data.region_code]["provinces"][data.code], "drawned", true);
-            this.addProvince(data);
-            this.loading = false;
-          }
-        })
-      }
-    });
+    const callback = (geolocation) => {
+      const lat = geolocation.coords.latitude || geolocation.lat;
+      const lng = geolocation.coords.longitude || geolocation.lon;
+      $.get({
+        url: `/api/v1/geo-data/province-by-coords?latitude=${lat}&longitude=${lng}`,
+        success: (data) => {
+          Vue.set(this.nationData["regions"][data.region_code]["provinces"][data.code], "drawned", true);
+          this.addProvince(data);
+        }
+      })
+    }
+    if (navigator.geolocation) {
+      // if access to geolocation browser api is granted, use it to get coords
+      navigator.geolocation.getCurrentPosition(callback);
+    } else {
+      // else use ip to geolocation api
+      $.get({
+        url: `http://ip-api.com/json/`,
+        success: callback
+      });
+    }
   },
   computed: { },
   methods: {
