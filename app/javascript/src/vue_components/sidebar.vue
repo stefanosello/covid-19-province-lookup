@@ -23,9 +23,9 @@ export default {
   computed: {},
   methods: {
     showRegion(region) {
-      const textInRegionLabel = region.label.toLowerCase().includes(this.searchText);
+      const textInRegionLabel = region.label.toLowerCase().includes(this.searchText.toLowerCase());
       const textInProvincesLabel = Object.values(region.provinces).filter(province => {
-        return province.label.toLowerCase().includes(this.searchText);
+        return province.label.toLowerCase().includes(this.searchText.toLowerCase());
       }).length > 0;
       return textInRegionLabel || textInProvincesLabel;
     },
