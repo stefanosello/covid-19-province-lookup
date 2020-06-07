@@ -1,4 +1,6 @@
 <script type="text/javascript">
+import { get } from 'lodash';
+
 export default {
   props: {
     nation: {
@@ -20,9 +22,10 @@ export default {
     }
   },
   mounted() {
-    const callback = (geolocation) => {
-      const lat = geolocation.coords.latitude || geolocation.lat;
-      const lng = geolocation.coords.longitude || geolocation.lon;
+    let geolocationAllowed = false;
+    const successCallback = (geolocation) => {
+      const lat = get(geolocation, ["coords", "latitude"], null) || geolocation.lat;
+      const lng = get(geolocation, ["coords", "longitude"], null) || geolocation.lon;
       $.get({
         url: `/api/v1/geo-data/province-by-coords?latitude=${lat}&longitude=${lng}`,
         success: (data) => {
@@ -33,12 +36,19 @@ export default {
     }
     if (navigator.geolocation) {
       // if access to geolocation browser api is granted, use it to get coords
-      navigator.geolocation.getCurrentPosition(callback);
-    } else {
+      navigator.geolocation.getCurrentPosition(
+        (data) => {
+          geolocationAllowed = true;
+          successCallback(data)
+        },
+        (error) => { geolocationAllowed = false; }
+      );
+    }
+    if (!geolocationAllowed) {
       // else use ip to geolocation api
       $.get({
         url: `https://ip-api.com/json/`,
-        success: callback
+        success: successCallback
       });
     }
   },
@@ -114,7 +124,7 @@ export default {
       </div>
     </div>
 
-    <div class="row footer d-flex justify-content-center align-items-center text-white">Made with ♥ by <a class="ml-1" target="_blank" href="http://www.stefanosello.it">Mr5he11</a>.</div>
+    <div class="row footer d-flex justify-content-center align-items-center text-white">Made with ♥ by <a class="ml-1 text-dark" target="_blank" href="http://www.stefanosello.it">Mr5he11</a></div>
 
     <transition enter-active-class="animate__animated animate__fadeIn animate__fast" leave-active-class="animate__animated animate__fadeOut animate__fast">
       <div class="sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
