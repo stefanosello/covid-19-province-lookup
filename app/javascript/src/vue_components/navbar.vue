@@ -12,7 +12,7 @@ export default {
 
 <template>
   <div class="w-100 px-3 d-flex justify-content-between align-items-center" navbar-component>
-    <div><div class="font-weight-bold">Covid-19</div> <div class="small">Province Lookup</div></div>
+    <h1><div class="font-weight-bold">Covid-19</div> <div class="small">Province Lookup</div></h1>
     <button class="btn btn-dark btn-sm font-weight" @click="$emit('open-sidebar')">SELEZIONA PROVINCE</button>
   </div>
 </template>
@@ -22,5 +22,9 @@ export default {
   height: $header-height;
   background-color: $gray-700;
   color: white;
+
+  h1 {
+    font-size: 1rem;
+  }
 }
 </style>
