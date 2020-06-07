@@ -37,7 +37,7 @@ export default {
     } else {
       // else use ip to geolocation api
       $.get({
-        url: `http://ip-api.com/json/`,
+        url: `https://ip-api.com/json/`,
         success: callback
       });
     }
@@ -120,7 +120,7 @@ export default {
       <div class="sidebar-layer" v-if="isSidebarOpen" @click="isSidebarOpen = false"></div>
     </transition>
 
-    <transition enter-active-class="animate__animated animate__slideInRight animate__fast" leave-active-class="animate__animated animate__slideOutRight animate__fast">
+    <transition enter-active-class="animate__animated animate__fadeInRight animate__faster" leave-active-class="animate__animated animate__fadeOutRight animate__faster">
       <div class="sidebar-container" v-if="isSidebarOpen">
         <sidebar :nation="nationData" @remove-province="removeProvince" @add-province="addProvince" @close="isSidebarOpen = false"></sidebar>
       </div>
@@ -153,6 +153,7 @@ export default {
     bottom: 0;
     left: 0;
     right: 0;
+    z-index: calc(#{$zindex-sticky} + 1);
   }
 
   .spinner-layer,
@@ -162,11 +163,11 @@ export default {
 
   .sidebar-container {
     position: fixed;
-    z-index: calc(#{$chart-zindex} + 2);
+    z-index: calc(#{$zindex-sticky} + 1);
     top: 0;
     right: 0;
     width: 80vw;
-    height: 100vh;
+    margin: 1rem;
 
     @include media-breakpoint-up(md) {
       width: 50vw;

@@ -10,7 +10,8 @@ export default {
   },
   data() {
     return {
-      regions: this.nation.regions
+      regions: this.nation.regions,
+      searchText: ""
     }
   },
   mounted() {
@@ -19,8 +20,18 @@ export default {
   destroyed() {
     clearAllBodyScrollLocks();
   },
-  computed: { },
+  computed: {},
   methods: {
+    showRegion(region) {
+      const textInRegionLabel = region.label.toLowerCase().includes(this.searchText);
+      const textInProvincesLabel = Object.values(region.provinces).filter(province => {
+        return province.label.toLowerCase().includes(this.searchText);
+      }).length > 0;
+      return textInRegionLabel || textInProvincesLabel;
+    },
+    toggleCollapsible(id) {
+      $(`#${id}`).collapse("toggle");
+    },
     toggleProvince(region_index, province_index) {
       let province = this.regions[region_index].provinces[province_index];
       if(province.drawned) {
@@ -37,22 +48,33 @@ export default {
 
 <template>
   <div class="w-100" sidebar-component>
-    <div class="card-body p-3 px-xl-5 position-relative">
-      <span class="close-icon font-weight-bold cursor-pointer position-absolute" @click="$emit('close')">&times</span>
-      <div class="alert alert-primary font-weight-bold mr-5 px-3"> Seleziona le province di interesse</div>
-      <div class="mx-n2 w-100 d-flex flex-wrap">
-        <div v-for="(region, region_index) in regions" :key="`region-${region.code}`" class="dropdown">
-          <button data-toggle="dropdown" class="btn btn-sm btn-outline-secondary text-uppercase m-2 dropdown-toggle">
-            {{region.label}}
-          </button>
-          <div class="dropdown-menu">
-            <div class="px-2" v-for="(province, province_index) in region.provinces">
-              <div class="custom-control custom-checkbox">
-                <input type="checkbox" class="custom-control-input" :id="`checkbox-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
-                <label class="custom-control-label" :for="`checkbox-${province.label}`">{{province.label}}</label>
+    <div class="card-body p-3 p-xl-5 position-relative">
+      <div class="border-bottom mb-3">
+        <span class="close-icon font-weight-bold cursor-pointer position-absolute" @click="$emit('close')">&times;</span>
+        <div class="font-weight-bold mb-3"> IMPOSTAZIONI </div>
+      </div>
+
+      <div class="input-group mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text" id="search-addon">?</span>
+        </div>
+        <input type="text" class="form-control" placeholder="Cerca un luogo..." v-model="searchText" aria-label="search" aria-describedby="search-addon">
+      </div>
+
+      <div class="w-100 p-2 my-1 region-item" v-for="(region, region_index) in regions" :key="`region-${region.code}`" v-show="showRegion(region)">
+        <a @click="toggleCollapsible(`${region_index}-collapse`)" data-toggle="collapse" class="cursor-pointer">
+          {{region.label}}
+        </a>
+
+        <div :id="`${region_index}-collapse`" class="collapse">
+          <div class="py-1">
+            <div class="px-2" v-for="(province, province_index) in region.provinces" :key="`${province.initials}-${province.index}`">
+              <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" :id="`switch-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
+                <label class="custom-control-label" :for="`switch-${province.label}`">{{province.label}}</label>
               </div>
-            </div>        
-          </div>
+            </div>
+          </div>      
         </div>
       </div>
     </div>
@@ -61,15 +83,21 @@ export default {
 
 <style lang="scss">
 [sidebar-component] {
-  border-left: 1px solid $gray-600;
-  max-height: 100vh;
-  height: 100vh;
+  max-height: calc(100vh - 2rem);
+  height: calc(100vh - 2rem);
 
   .card-body {
     height: 100%;
     max-height: 100%;
     overflow-y: auto;
     background-color: $gray-200;
+    border-radius: .25rem;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .region-item {
+    background-color: $gray-300;
+    border-radius: .25rem;
   }
 
   .provinces-container {
@@ -78,8 +106,8 @@ export default {
     width: 15rem;
   }
 
-  .dropdown-menu {
-    border-radius: 0;
+  #search-addon {
+    background-color: $gray-300 !important;
   }
 
   .close-icon {
@@ -87,10 +115,6 @@ export default {
     top: 1.5rem;
     font-size: 2rem;
     line-height: 0;
-  }
-
-  .btn {
-    border-radius: 0rem;
   }
 
   .btn-outline-secondary {
