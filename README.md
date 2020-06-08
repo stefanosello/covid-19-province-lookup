@@ -3,6 +3,7 @@
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/Mr5he11/covid-19-province-lookup/commits/master)
 [![Website http://covid-19-province-lookup.herokuapp.com/](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](http://covid-19-province-lookup.herokuapp.com/)
 [![Open Source Love svg1](https://badges.frapsoft.com/os/v1/open-source.svg?v=103)](https://github.com/ellerbrock/open-source-badges/)
+[![Website shields.io](https://img.shields.io/website-up-down-green-red/http/shields.io.svg)](https://www.covid19-stats.it/)
 
 
 This project was born because of the need of having a way to visualize data about Covid-19 pandemic in the italian provinces.
