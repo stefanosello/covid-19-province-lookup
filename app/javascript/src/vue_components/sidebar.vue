@@ -48,7 +48,7 @@ export default {
 
 <template>
   <div class="w-100" sidebar-component>
-    <div class="card-body p-3 p-xl-5 position-relative">
+    <div class="card-body p-3 p-xl-5 position-relative d-flex flex-column">
       <div class="border-bottom mb-3">
         <span class="close-icon font-weight-bold cursor-pointer position-absolute" @click="$emit('close')">&times;</span>
         <div class="font-weight-bold mb-3"> IMPOSTAZIONI </div>
@@ -61,20 +61,22 @@ export default {
         <input type="text" class="form-control" placeholder="Cerca un luogo..." v-model="searchText" aria-label="search" aria-describedby="search-addon">
       </div>
 
-      <div class="w-100 p-2 my-1 region-item" v-for="(region, region_index) in regions" :key="`region-${region.code}`" v-show="showRegion(region)">
-        <a @click="toggleCollapsible(`${region_index}-collapse`)" data-toggle="collapse" class="cursor-pointer">
-          {{region.label}}
-        </a>
+      <div class="scrollable-area flex-grow-1">
+        <div class="w-100 p-2 my-1 region-item" v-for="(region, region_index) in regions" :key="`region-${region.code}`" v-show="showRegion(region)">
+          <a @click="toggleCollapsible(`${region_index}-collapse`)" data-toggle="collapse" class="cursor-pointer">
+            {{region.label}}
+          </a>
 
-        <div :id="`${region_index}-collapse`" class="collapse">
-          <div class="py-1">
-            <div class="px-2" v-for="(province, province_index) in region.provinces" :key="`${province.initials}-${province.index}`">
-              <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" :id="`switch-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
-                <label class="custom-control-label" :for="`switch-${province.label}`">{{province.label}}</label>
+          <div :id="`${region_index}-collapse`" class="collapse">
+            <div class="py-1">
+              <div class="px-2" v-for="(province, province_index) in region.provinces" :key="`${province.initials}-${province.index}`">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" :id="`switch-${province.label}`" :checked="province.drawned" @click.stop.capture="toggleProvince(region_index, province_index)">
+                  <label class="custom-control-label" :for="`switch-${province.label}`">{{province.label}}</label>
+                </div>
               </div>
-            </div>
-          </div>      
+            </div>      
+          </div>
         </div>
       </div>
     </div>
@@ -89,7 +91,7 @@ export default {
   .card-body {
     height: 100%;
     max-height: 100%;
-    overflow-y: auto;
+    overflow-y: hidden;
     background-color: $gray-200;
     border-radius: .25rem;
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1), 0 6px 20px 0 rgba(0, 0, 0, 0.1);
@@ -100,10 +102,8 @@ export default {
     border-radius: .25rem;
   }
 
-  .provinces-container {
-    background-color: white;
-    z-index: 1;
-    width: 15rem;
+  .scrollable-area {
+    overflow-y: auto;
   }
 
   #search-addon {
