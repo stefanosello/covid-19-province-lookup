@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script>
 import { disableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
 export default {
